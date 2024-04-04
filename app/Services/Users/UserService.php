@@ -98,6 +98,7 @@ class UserService
             Log::channel('daily_fetch_user_data')->info($e->getMessage());
         }
         return false;
+        
     }
 
     /**
