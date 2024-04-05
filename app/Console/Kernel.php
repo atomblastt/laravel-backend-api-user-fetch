@@ -9,8 +9,10 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('cron:fetch-user-data')->hourly();
-        $schedule->command('cron:daily-record-job')->dailyAt('23:59');
+        $schedule->command('cron:fetch-user-data')->everyMinute();
+        //$schedule->command('cron:fetch-user-data')->hourly();
+        //$schedule->command('cron:daily-record-job')->dailyAt('23:59');
+        $schedule->command('cron:daily-record-job')->everyTwoMinutes();
 
     }
 
