@@ -7,7 +7,7 @@ use App\Services\Users\UserService;
 
 class UserFetchDataCron extends Command
 {
-    protected $signature = 'cron:fetch-user-data';
+    protected $signature = 'cron:fetch-user-data-cron';
 
     protected $description = 'Fetch user data from external API and store into database';
 

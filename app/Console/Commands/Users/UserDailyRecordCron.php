@@ -3,12 +3,11 @@
 namespace App\Console\Commands\Users;
 
 use Illuminate\Console\Command;
-use App\Services\Users\UserService;
 use App\Jobs\Users\UserDailyRecordJob;
 
 class UserDailyRecordCron extends Command
 {
-    protected $signature = 'cron:daily-record-job';
+    protected $signature = 'cron:daily-record-job-cron';
 
     protected $description = 'Trigger job daily record';
 
