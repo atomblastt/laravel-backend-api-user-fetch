@@ -93,7 +93,7 @@ class UserDailyRecordService
             # DECREMENT DATA IN REDIS
             $redis = Redis::connection('user');
             $redis->multi();
-            $redisKey = config('custom.redis.prefix.hourly_record') . Carbon::parse($data['created_at'])->format('Y-m-d_H');
+            $redisKey = config('custom.redis.prefix.hourly_record') . Carbon::parse($data['created_at'])->format('Y-m-d:H');
             $gender = $data['gender'];
             $redis->hIncrBy($redisKey, $gender, -1);
             $results = $redis->exec();
