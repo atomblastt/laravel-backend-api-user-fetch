@@ -75,10 +75,17 @@ class UserRepository extends BaseRepository
      *
      * @return Mixed
      */
-    public function getAvg($where = [], $columns = '*', $avg = '')
+    public function getAvg($where = [], $columns = '*', $avg = '', $date = null)
     {
-        return $this->model->select($columns)->where($where)->avg($avg);
+        $data = $this->model->select($columns)->where($where);
+
+        if ($date !== null) {
+            $data->whereDate('created_at', $date);
+        }
+
+        return $data->avg($avg);
     }
+
 
     /**
      * Create

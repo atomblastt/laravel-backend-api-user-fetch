@@ -35,11 +35,13 @@ class UserHelper {
         $repository = new UserRepository();
         $maleAverageAge = $repository->getAvg(
             where: ['gender' => 'male'],
-            avg: 'age'
+            avg: 'age',
+            date: $date
         );
         $femaleAverageAge = $repository->getAvg(
             where: ['gender' => 'female'],
-            avg: 'age'
+            avg: 'age',
+            date: $date
         );
 
         return [
