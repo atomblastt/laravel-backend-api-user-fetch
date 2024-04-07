@@ -85,6 +85,7 @@ class UserDailyRecordService
         try {
             $sessionLog = Str::random(10);
             Log::channel('listener_decrement_daily_record')->info('['.$sessionLog.'] === DECREMENT DAILY RECORD START ===');
+            
             # get user data from trash data
             $userData = $this->userRepository->findByKey(
                 key:['id' => $id],
@@ -112,13 +113,16 @@ class UserDailyRecordService
             );
             if ($checkDailyRecord) {
                 Log::channel('listener_decrement_daily_record')->info('inner check daily record');
+
                 $dataDailyRecord = UserHelper::calculateDailyRecord(Carbon::parse($data['created_at'])->format('Y-m-d'));
                 Log::channel('listener_decrement_daily_record')->info(json_encode($dataDailyRecord));
+
                 $this->repository->update(
                     id: $checkDailyRecord['id'],
                     attributes: $dataDailyRecord,
                 );
             }
+            
             Log::channel('listener_decrement_daily_record')->info('['.$sessionLog.']=== DECREMENT DAILY RECORD END ===');
             Log::channel('listener_decrement_daily_record')->info(' ');
         } catch (Exception $e) {

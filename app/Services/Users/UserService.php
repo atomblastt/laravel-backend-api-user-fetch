@@ -57,6 +57,7 @@ class UserService
             $redis = Redis::connection('user');
             
             $today = now()->format('Y-m-d:H');
+            
             Log::channel('daily_fetch_user_data')->info('=== CRON '.$today.' RUN ===');
             Log::channel('daily_fetch_user_data')->info($today);
     
@@ -95,9 +96,11 @@ class UserService
             # set data count male & female to Redis
             $redis->hSet(config('custom.redis.prefix.hourly_record') . $today, 'male', $maleUsers);
             $redis->hSet(config('custom.redis.prefix.hourly_record') . $today, 'female', $femaleUsers);
+
             Log::channel('daily_fetch_user_data')->info('Male in '.$today.' = '. $maleUsers);
             Log::channel('daily_fetch_user_data')->info('Female in '.$today.' = '. $femaleUsers);
             Log::channel('daily_fetch_user_data')->info('=== CRON '.$today.' CLOSE ===');
+
             return true;
         } catch (\Exception $e) {
             Log::channel('daily_fetch_user_data')->info($e->getMessage());
