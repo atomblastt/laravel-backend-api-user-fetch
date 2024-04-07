@@ -5,6 +5,7 @@ namespace App\Services\Users;
 use Exception;
 use Carbon\Carbon;
 use App\Helpers\UserHelper;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use App\Repositories\Users\UserRepository;
@@ -82,6 +83,8 @@ class UserDailyRecordService
     public function decrementDailyRecord($id)
     {
         try {
+            $sessionLog = Str::random(10);
+            Log::channel('listener_decrement_daily_record')->info('['.$sessionLog.'] === DECREMENT DAILY RECORD START ===');
             # get user data from trash data
             $userData = $this->userRepository->findByKey(
                 key:['id' => $id],
@@ -108,12 +111,16 @@ class UserDailyRecordService
                 key: ['date' => Carbon::parse($data['created_at'])->format('Y-m-d')]
             );
             if ($checkDailyRecord) {
+                Log::channel('listener_decrement_daily_record')->info('inner check daily record');
                 $dataDailyRecord = UserHelper::calculateDailyRecord(Carbon::parse($data['created_at'])->format('Y-m-d'));
+                Log::channel('listener_decrement_daily_record')->info(json_encode($dataDailyRecord));
                 $this->repository->update(
                     id: $checkDailyRecord['id'],
                     attributes: $dataDailyRecord,
                 );
             }
+            Log::channel('listener_decrement_daily_record')->info('['.$sessionLog.']=== DECREMENT DAILY RECORD END ===');
+            Log::channel('listener_decrement_daily_record')->info(' ');
         } catch (Exception $e) {
             # rollback transaction redis
             $redis->discard();
