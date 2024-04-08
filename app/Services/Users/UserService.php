@@ -60,7 +60,7 @@ class UserService
             
             Log::channel('daily_fetch_user_data')->info('=== CRON '.$today.' RUN ===');
             Log::channel('daily_fetch_user_data')->info($today);
-    
+
             # define male & female users for redis
             $maleUsers = 0;
             $femaleUsers = 0;
@@ -68,46 +68,58 @@ class UserService
             # fetch data from API using HTTP GET request.
             $apiUrl = config('api.random-user.url');
             $response = Http::get($apiUrl);
-            $users = $response->json()['results'];
 
-            # processing data from cronjobs
-            foreach ($users as $user) {
-                $uuid = $user['login']['uuid'];
-                
-                # create new or update data if uuid exist in table
-                $this->updateOrCreate(
-                    params: ['uuid' => $uuid],
-                    data: [
-                        'gender' => $user['gender'],
-                        'name' => $user['name'],
-                        'location' => $user['location'],
-                        'age' => $user['dob']['age']
-                    ]
-                );
+            # Check if the response is successful (HTTP status code 2xx)
+            if ($response->successful()) {
+                $users = $response->json()['results'];
 
-                # count total user male & female before set to redis
-                if ($user['gender'] === 'male') {
-                    $maleUsers++;
-                } elseif ($user['gender'] === 'female') {
-                    $femaleUsers++;
+                # processing data from cronjobs
+                foreach ($users as $user) {
+                    $uuid = $user['login']['uuid'];
+                    
+                    # create new or update data if uuid exist in table
+                    $this->updateOrCreate(
+                        params: ['uuid' => $uuid],
+                        data: [
+                            'gender' => $user['gender'],
+                            'name' => $user['name'],
+                            'location' => $user['location'],
+                            'age' => $user['dob']['age']
+                        ]
+                    );
+
+                    # count total user male & female before set to redis
+                    if ($user['gender'] === 'male') {
+                        $maleUsers++;
+                    } elseif ($user['gender'] === 'female') {
+                        $femaleUsers++;
+                    }
                 }
+
+                # set data count male & female to Redis
+                $redis->hSet(config('custom.redis.prefix.hourly_record') . $today, 'male', $maleUsers);
+                $redis->hSet(config('custom.redis.prefix.hourly_record') . $today, 'female', $femaleUsers);
+
+                Log::channel('daily_fetch_user_data')->info('Male in '.$today.' = '. $maleUsers);
+                Log::channel('daily_fetch_user_data')->info('Female in '.$today.' = '. $femaleUsers);
+                Log::channel('daily_fetch_user_data')->info('=== CRON '.$today.' CLOSE ===');
+
+                return true;
+            } else {
+                # handle HTTP errors
+                $statusCode = $response->status();
+
+                # log the error message
+                Log::channel('daily_fetch_user_data')->error("HTTP error encountered: Status code $statusCode");
+
+                return false;
             }
-
-            # set data count male & female to Redis
-            $redis->hSet(config('custom.redis.prefix.hourly_record') . $today, 'male', $maleUsers);
-            $redis->hSet(config('custom.redis.prefix.hourly_record') . $today, 'female', $femaleUsers);
-
-            Log::channel('daily_fetch_user_data')->info('Male in '.$today.' = '. $maleUsers);
-            Log::channel('daily_fetch_user_data')->info('Female in '.$today.' = '. $femaleUsers);
-            Log::channel('daily_fetch_user_data')->info('=== CRON '.$today.' CLOSE ===');
-
-            return true;
         } catch (\Exception $e) {
-            Log::channel('daily_fetch_user_data')->info($e->getMessage());
+            Log::channel('daily_fetch_user_data')->error($e->getMessage());
+            throw $e;
         }
-        return false;
-        
     }
+
 
     /**
      * Soft Delete By Id

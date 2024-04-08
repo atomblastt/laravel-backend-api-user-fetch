@@ -42,6 +42,32 @@ expect()->extend('toBeOne', function () {
 |
 */
 
+
+function generateUserData($gender) {
+    return [
+        'login' => [
+            'uuid' => fake()->uuid()
+        ],
+        'gender' => $gender,
+        'name' => json_encode([
+            'title' => ($gender === 'male') ? fake()->titleMale() : fake()->titleFemale(),
+            'first' => ($gender === 'male') ? fake()->firstNameMale() : fake()->firstNameFemale(),
+            'last' => fake()->lastName($gender),
+        ]),
+        'location' => json_encode([
+            'street' => [ 
+                'name' => fake()->streetName(), 
+            ], 
+            'city' => fake()->city(),  
+            'country' => fake()->country(), 
+            'postcode' => fake()->postcode(), 
+        ]),
+        'dob' => [
+            'age' => fake()->numberBetween(1, 50),
+        ]
+    ];
+}
+
 function something()
 {
     // ..
