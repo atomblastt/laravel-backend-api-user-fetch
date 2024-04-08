@@ -4,7 +4,3 @@ it('has home', function () {
  
     $this->assertTrue(true);
 });
-
-it('should fail intentionally', function () {
-    expect(true)->toBeFalse();
-});
